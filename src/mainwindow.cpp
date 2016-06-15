@@ -112,7 +112,6 @@ void MainWindow::on_path_returnPressed()
 
 
 bool MainWindow::FindPoseEstimation(
-        int working_view,
         cv::Mat_<double>& rvec,
         cv::Mat_<double>& t,
         cv::Mat_<double>& R,
@@ -138,7 +137,7 @@ bool MainWindow::FindPoseEstimation(
     cv::projectPoints(ppcloud, rvec, t, K, distcoeff, projected3D);
 
     if(inliers.size()==0) { //get inliers
-        for(int i=0;i<projected3D.size();i++) {
+        for(unsigned int i=0;i<projected3D.size();i++) {
             if(norm(projected3D[i]-imgPoints[i]) < 5.0)
                 inliers.push_back(i);
         }
@@ -267,7 +266,7 @@ void MainWindow::reconstruct_first_two_view()
         outCloud[i].imgpt_for_img[1] = matches_new[i].trainIdx;
     }
 
-    for(int i=0;i<outCloud.size();i++)
+    for(unsigned int i=0;i<outCloud.size();i++)
     {
         outCloud_all.push_back(outCloud[i]);
     }
@@ -342,7 +341,7 @@ void MainWindow::on_PB_Reconstruction_clicked()
             }
         }
 
-        bool pose_estimated = FindPoseEstimation(img_now,rvec,t,R,tmp3d,tmp2d);
+        bool pose_estimated = FindPoseEstimation(rvec,t,R,tmp3d,tmp2d);
         if(!pose_estimated)
         {
             cout << "error"<<endl;
@@ -378,7 +377,7 @@ void MainWindow::on_PB_Reconstruction_clicked()
         outCloud.clear();
         outCloud= outCloud_tmp;
 
-        for(int i=0;i<outCloud.size();i++)
+        for(unsigned int i=0;i<outCloud.size();i++)
         {
             outCloud_all.push_back(outCloud[i]);
         }
@@ -427,7 +426,7 @@ void MainWindow::GetRGBForPointCloud(
         std::vector<cv::Vec3b> point_colors;
         for(; good_view < imgs_orig.size(); good_view++) {
             if(_pcloud[i].imgpt_for_img[good_view] != -1) {
-                int pt_idx = _pcloud[i].imgpt_for_img[good_view];
+                unsigned int pt_idx = _pcloud[i].imgpt_for_img[good_view];
                 if(pt_idx >= imgpts[good_view].size()) {
                     std::cerr << i << "BUG: point id:" << pt_idx << " should not exist for img #" << good_view << " which has only " << imgpts[good_view].size() << std::endl;
                     continue;

@@ -34,7 +34,7 @@ void SFMViewer::update(std::vector<cv::Point3d> pcld,
     //compute transformation to place cameras in world
     m_cameras_transforms.resize(m_cameras.size());
     Eigen::Vector3d c_sum(0, 0, 0);
-    for (int i = 0; i < m_cameras.size(); ++i) {
+    for (unsigned int i = 0; i < m_cameras.size(); ++i) {
         Eigen::Matrix<double, 3, 4> P = Eigen::Map<Eigen::Matrix<double, 3, 4, Eigen::RowMajor> >(m_cameras[i].val);
         Eigen::Matrix3d R = P.block(0, 0, 3, 3);
         Eigen::Vector3d t = P.block(0, 3, 3, 1);
@@ -50,7 +50,7 @@ void SFMViewer::update(std::vector<cv::Point3d> pcld,
 
     cout << "compute transformation to place cameras in world finished " <<endl;
 
-    for (int i = 0; i < m_pcld.size(); ++i) {
+    for (unsigned int i = 0; i < m_pcld.size(); ++i) {
         //cout << (int)m_pcldrgb[i][0] <<"|"<< (int)m_pcldrgb[i][0]<<"|" << (int)m_pcldrgb[i][0] <<endl;
     }
 
@@ -71,7 +71,7 @@ void SFMViewer::draw() {
     glPushAttrib (GL_ENABLE_BIT);
     glDisable (GL_LIGHTING);
     glBegin (GL_POINTS);
-    for (int i = 0; i < m_pcld.size(); ++i) {
+    for (unsigned int i = 0; i < m_pcld.size(); ++i) {
         glColor3ub(m_pcldrgb[i][0], m_pcldrgb[i][1], m_pcldrgb[i][2]);
         glVertex3dv(&(m_pcld[i].x));
     }
@@ -80,7 +80,7 @@ void SFMViewer::draw() {
 //	glScaled(scale_cameras_down,scale_cameras_down,scale_cameras_down);
     glEnable(GL_RESCALE_NORMAL);
     glEnable(GL_LIGHTING);
-    for (int i = 0; i < m_cameras_transforms.size(); ++i) {
+    for (unsigned int i = 0; i < m_cameras_transforms.size(); ++i) {
 
         glPushMatrix();
         glMultMatrixd(m_cameras_transforms[i].data());

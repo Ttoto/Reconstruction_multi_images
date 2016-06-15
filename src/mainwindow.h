@@ -97,7 +97,6 @@ private:
 
 
     bool FindPoseEstimation(
-        int working_view,
         cv::Mat_<double>& rvec,
         cv::Mat_<double>& t,
         cv::Mat_<double>& R,
