@@ -89,7 +89,7 @@ double TriangulatePoints(const vector<KeyPoint>& pt_set1,
                 0,		0,		0,		1);
     Matx44d P1inv(P1_.inv());
 
-    cout << "Triangulating...";
+    //cout << "Triangulating...";
     double t = getTickCount();
     vector<double> reproj_error;
     unsigned int pts_size = pt_set1.size();
@@ -131,7 +131,7 @@ double TriangulatePoints(const vector<KeyPoint>& pt_set1,
 
     Scalar mse = mean(reproj_error);
     t = ((double)getTickCount() - t)/getTickFrequency();
-    cout << "Done. ("<<pointcloud.size()<<"points, " << t <<"s, mean reproj err = " << mse[0] << ")"<< endl;
+    //cout << "Done. ("<<pointcloud.size()<<"points, " << t <<"s, mean reproj err = " << mse[0] << ")"<< endl;
 
     return mse[0];
 }

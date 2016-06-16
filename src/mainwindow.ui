@@ -58,6 +58,13 @@
        </property>
       </widget>
      </item>
+     <item>
+      <widget class="QPushButton" name="method2">
+       <property name="text">
+        <string>R-method2</string>
+       </property>
+      </widget>
+     </item>
     </layout>
    </widget>
    <widget class="SFMViewer" name="widget" native="true">
@@ -76,7 +83,7 @@
      </sizepolicy>
     </property>
    </widget>
-   <widget class="QWidget" name="">
+   <widget class="QWidget" name="layoutWidget">
     <property name="geometry">
      <rect>
       <x>280</x>

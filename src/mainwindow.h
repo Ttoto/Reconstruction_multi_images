@@ -49,6 +49,8 @@ private slots:
 
     void on_pushButton_clicked();
 
+    void on_method2_clicked();
+
 private:
     Ui::MainWindow *ui;
 
@@ -71,8 +73,6 @@ private:
     vector<DMatch> matches_prev;
     vector<DMatch> matches_new;
 
-    cv::Matx34d P_first;
-    cv::Matx34d P_second;
     std::vector<CloudPoint> outCloud;
     std::vector<CloudPoint> outCloud_prev;
     std::vector<CloudPoint> outCloud_new;

@@ -39,9 +39,11 @@ void matching_good_matching_filter(vector<DMatch>& matches)
         if( dist < min_dist ) min_dist = dist;
         if( dist > max_dist ) max_dist = dist;
     }
-    if (min_dist <= 0) {
+    if (min_dist <= 10) {
         min_dist = 10.0;
     }
+
+
     cout << matches.size();
     cout<<"-- Max dist : "<<max_dist<<endl;
     cout<<"-- Min dist : "<<min_dist<<endl;
