@@ -212,7 +212,7 @@ bool FindCameraMatrices(const Mat& K,
 {
     //Find camera matrices
     {
-        //cout << "Find camera matrices...";
+        cout << "Find camera matrices...";
         double t = getTickCount();
 
         Mat F = GetFundamentalMat(imgpts1,imgpts2,imgpts1_good,imgpts2_good,matches);
@@ -220,24 +220,12 @@ bool FindCameraMatrices(const Mat& K,
             cerr << "not enough inliers after F matrix" << endl;
             return false;
         }
-//        cout << "FundamentalMat F " << endl;
-//        cout << Mat(F) << endl;
 
-//        cout << "Cmaera matrix K " << endl;
-//        cout << Mat(K) << endl;
-
-//        cout << "Cmaera matrix K.t() " << endl;
-//        cout << Mat(K.t()) << endl;
-
-        //Essential matrix: compute then extract cameras [R|t]
-
+//        //Essential matrix: compute then extract cameras [R|t]
         Mat_<double> E = K.t() * F * K; //according to HZ (9.12)
 
-//        cout << "Essential matrix K.t() " << endl;
-//        cout << Mat(E) << endl;
-
         //according to http://en.wikipedia.org/wiki/Essential_matrix#Properties_of_the_essential_matrix
-        if(fabsf(determinant(E)) > 1e-01) {
+        if(fabsf(determinant(E)) > 1e-02) {
             cout << "det(E) != 0 : " << determinant(E) << "\n";
             P1 = 0;
             return false;
@@ -267,7 +255,7 @@ bool FindCameraMatrices(const Mat& K,
             P1 = Matx34d(R1(0,0),	R1(0,1),	R1(0,2),	t1(0),
                          R1(1,0),	R1(1,1),	R1(1,2),	t1(1),
                          R1(2,0),	R1(2,1),	R1(2,2),	t1(2));
-            cout << "Testing P1 1st" << endl;
+            cout << "Testing P1 1" << endl;
 
             vector<CloudPoint> pcloud,pcloud1; vector<KeyPoint> corresp;
             double reproj_error1 = TriangulatePoints(imgpts1_good, imgpts2_good, K, Kinv, distcoeff, P, P1, pcloud, corresp);
@@ -275,18 +263,17 @@ bool FindCameraMatrices(const Mat& K,
 
             vector<uchar> tmp_status;
             //check if pointa are triangulated --in front-- of cameras for all 4 ambiguations
-            cout << "reproj_error1:" <<reproj_error1 <<"  "<<"reproj_error2"<<reproj_error2<<endl;
             if (!TestTriangulation(pcloud,P1,tmp_status) || !TestTriangulation(pcloud1,P,tmp_status) || reproj_error1 > 3000.0 || reproj_error2 > 3000.0)
             {
                 P1 = Matx34d(R1(0,0),	R1(0,1),	R1(0,2),	t2(0),
                              R1(1,0),	R1(1,1),	R1(1,2),	t2(1),
                              R1(2,0),	R1(2,1),	R1(2,2),	t2(2));
-                cout << "Testing P1 2nd"<< endl;
+                cout << "Testing P1 2" << endl;
 
                 pcloud.clear(); pcloud1.clear(); corresp.clear();
                 reproj_error1 = TriangulatePoints(imgpts1_good, imgpts2_good, K, Kinv, distcoeff, P, P1, pcloud, corresp);
                 reproj_error2 = TriangulatePoints(imgpts2_good, imgpts1_good, K, Kinv, distcoeff, P1, P, pcloud1, corresp);
-                cout << "reproj_error1:" <<reproj_error1 <<"  "<<"reproj_error2"<<reproj_error2<<endl;
+
                 if (!TestTriangulation(pcloud,P1,tmp_status) || !TestTriangulation(pcloud1,P,tmp_status) || reproj_error1 > 3000.0 || reproj_error2 > 3000.0) {
                     if (!CheckCoherentRotation(R2)) {
                         cout << "resulting rotation is not coherent\n";
@@ -297,22 +284,22 @@ bool FindCameraMatrices(const Mat& K,
                     P1 = Matx34d(R2(0,0),	R2(0,1),	R2(0,2),	t1(0),
                                  R2(1,0),	R2(1,1),	R2(1,2),	t1(1),
                                  R2(2,0),	R2(2,1),	R2(2,2),	t1(2));
-                    cout << "Testing P1 3rd"<< endl;
+                    cout << "Testing P1 3"<< endl;
 
                     pcloud.clear(); pcloud1.clear(); corresp.clear();
                     reproj_error1 = TriangulatePoints(imgpts1_good, imgpts2_good, K, Kinv, distcoeff, P, P1, pcloud, corresp);
                     reproj_error2 = TriangulatePoints(imgpts2_good, imgpts1_good, K, Kinv, distcoeff, P1, P, pcloud1, corresp);
-                    cout << "reproj_error1:" <<reproj_error1 <<"  "<<"reproj_error2"<<reproj_error2<<endl;
+
                     if (!TestTriangulation(pcloud,P1,tmp_status) || !TestTriangulation(pcloud1,P,tmp_status) || reproj_error1 > 3000.0 || reproj_error2 > 3000.0) {
                         P1 = Matx34d(R2(0,0),	R2(0,1),	R2(0,2),	t2(0),
                                      R2(1,0),	R2(1,1),	R2(1,2),	t2(1),
                                      R2(2,0),	R2(2,1),	R2(2,2),	t2(2));
-//                        cout << "Testing P1 4th"<< endl;
+                        cout << "Testing P1 4"<< endl;
 
                         pcloud.clear(); pcloud1.clear(); corresp.clear();
                         reproj_error1 = TriangulatePoints(imgpts1_good, imgpts2_good, K, Kinv, distcoeff, P, P1, pcloud, corresp);
                         reproj_error2 = TriangulatePoints(imgpts2_good, imgpts1_good, K, Kinv, distcoeff, P1, P, pcloud1, corresp);
-                                            cout << "reproj_error1:" <<reproj_error1 <<"  "<<"reproj_error2"<<reproj_error2<<endl;
+
                         if (!TestTriangulation(pcloud,P1,tmp_status) || !TestTriangulation(pcloud1,P,tmp_status) || reproj_error1 > 3000.0 || reproj_error2 > 3000.0) {
                             cout << "Shit." << endl;
                             return false;

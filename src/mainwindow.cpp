@@ -397,6 +397,8 @@ void MainWindow::on_PB_Reconstruction_clicked()
 /* ------------------------------------------------------------------------- */
 void MainWindow::on_method2_clicked()
 {
+    imgpts.resize(filelist.size());
+
     on_PB_Sift_clicked();
 
     cout << endl << endl << endl << "Using Method 2:" <<endl;
@@ -408,10 +410,6 @@ void MainWindow::on_method2_clicked()
     P_0 = cv::Matx34d(1,0,0,0,
                       0,1,0,0,
                       0,0,1,0);
-
-    imgpts.resize(filelist.size());
-
-    reconstruct_first_two_view();
 
     cv::Mat_<double> t_prev = (cv::Mat_<double>(3,1) << 0, 0, 0);
     cv::Mat_<double> R_prev = (cv::Mat_<double>(3,3) << 0, 0, 0,
@@ -429,7 +427,7 @@ void MainWindow::on_method2_clicked()
                               0, 0, 0,
                               0, 0, 0);
     int index_prev;
-
+    reconstruct_first_two_view();
     std::cout << "Pmat[0]  = " << endl << Pmats[0]<<endl;
     std::cout << "Pmat[1]  = " << endl << Pmats[1]<<endl;
     for( int index_now = 2; index_now<filelist.size(); index_now++)
@@ -441,6 +439,7 @@ void MainWindow::on_method2_clicked()
         index_prev = index_now - 1;
         descriptors1.release();
         descriptors1 = descriptors2;
+        descriptors2.release();
 
         QString ymlFile;
         ymlFile = ymlFileDir;
@@ -451,6 +450,16 @@ void MainWindow::on_method2_clicked()
         //matching
         matching_fb_matcher(descriptors1,descriptors2,matches);
         matching_good_matching_filter(matches);
+
+        imggoodpts1.clear();
+        imggoodpts2.clear();
+        P_0 = cv::Matx34d(1,0,0,0,
+                          0,1,0,0,
+                          0,0,1,0);
+        P_1 = cv::Matx34d(1,0,0,0,
+                          0,1,0,0,
+                          0,0,1,0);
+        outCloud.clear();
 
         if(FindCameraMatrices(K,Kinv,distcoeff,
                               imgpts[index_prev],imgpts[index_now],
