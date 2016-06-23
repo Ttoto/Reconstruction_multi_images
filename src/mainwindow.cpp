@@ -341,12 +341,11 @@ void MainWindow::on_PB_Reconstruction_clicked()
         {
             cout << "error"<<endl;
         }
-
         //store estimated pose
         Pmats[img_now] = cv::Matx34d	(R(0,0),R(0,1),R(0,2),t(0),
                                          R(1,0),R(1,1),R(1,2),t(1),
                                          R(2,0),R(2,1),R(2,2),t(2));
-
+        cout << "Pmats:" << endl << Pmats[img_now] << endl;
         imgpts1_tmp.clear();
         imgpts2_tmp.clear();
 
@@ -397,6 +396,14 @@ void MainWindow::on_PB_Reconstruction_clicked()
 /* ------------------------------------------------------------------------- */
 void MainWindow::on_method2_clicked()
 {
+
+    int index_prev;
+    int index_now;
+    QString ymlFile;
+
+    vector<KeyPoint> imgpts1_tmp;
+    vector<KeyPoint> imgpts2_tmp;
+
     imgpts.resize(filelist.size());
 
     on_PB_Sift_clicked();
@@ -426,11 +433,11 @@ void MainWindow::on_method2_clicked()
     cv::Mat_<double> R_new = (cv::Mat_<double>(3,3) << 0, 0, 0,
                               0, 0, 0,
                               0, 0, 0);
-    int index_prev;
+
     reconstruct_first_two_view();
     std::cout << "Pmat[0]  = " << endl << Pmats[0]<<endl;
     std::cout << "Pmat[1]  = " << endl << Pmats[1]<<endl;
-    for( int index_now = 2; index_now<filelist.size(); index_now++)
+    for(index_now = 2; index_now<filelist.size(); index_now++)
     {
         cout << endl << endl << endl <<endl;
         cout << "dealing with " << filelist.at(index_now).fileName().toStdString() << endl;
@@ -441,7 +448,6 @@ void MainWindow::on_method2_clicked()
         descriptors1 = descriptors2;
         descriptors2.release();
 
-        QString ymlFile;
         ymlFile = ymlFileDir;
         ymlFile.append(filelist.at(index_now).fileName()).append(".yml");
         restore_descriptors_from_file(ymlFile.toStdString(),imgpts[index_now],descriptors2);
@@ -467,9 +473,8 @@ void MainWindow::on_method2_clicked()
                               P_0,P_1,
                               matches,
                               outCloud))
+
         {//if can find camera matries
-
-
             R_prev(0,0) = Pmats[index_prev](0,0);
             R_prev(0,1) = Pmats[index_prev](0,1);
             R_prev(0,2) = Pmats[index_prev](0,2);
@@ -479,9 +484,10 @@ void MainWindow::on_method2_clicked()
             R_prev(2,0) = Pmats[index_prev](2,0);
             R_prev(2,1) = Pmats[index_prev](2,1);
             R_prev(2,2) = Pmats[index_prev](2,2);
-            t_prev(0,0) = Pmats[index_prev](0,3);
-            t_prev(1,0) = Pmats[index_prev](1,3);
-            t_prev(2,0) = Pmats[index_prev](2,3);
+            t_prev(0) = Pmats[index_prev](0,3);
+            t_prev(1) = Pmats[index_prev](1,3);
+            t_prev(2) = Pmats[index_prev](2,3);
+
 
             R_now(0,0) = P_1(0,0);
             R_now(0,1) = P_1(0,1);
@@ -492,51 +498,117 @@ void MainWindow::on_method2_clicked()
             R_now(2,0) = P_1(2,0);
             R_now(2,1) = P_1(2,1);
             R_now(2,2) = P_1(2,2);
-            t_now(0,0) = P_1(0,3);
-            t_now(1,0) = P_1(1,3);
-            t_now(2,0) = P_1(2,3);
+            t_now(0) = P_1(0,3);
+            t_now(1) = P_1(1,3);
+            t_now(2) = P_1(2,3);
+
+            everystep[index_now]= sqrt(t_now(0)*t_now(0)
+                                       +t_now(1)*t_now(1)
+                                       +t_now(2)*t_now(2));
+
 
             invert(R_prev, R_prev_inv);
 
-            t_new = R_prev*t_now + t_prev;
-            R_new = R_now*R_prev;
+            t_new = t_prev + R_prev * t_now ;
+            R_new = R_now * R_prev;
+
+            pathstep[index_now] = sqrt((t_new(0)-t_prev(0))*(t_new(0)-t_prev(0))
+                                       +(t_new(1)-t_prev(1))*(t_new(1)-t_prev(1))
+                                       +(t_new(2)-t_prev(2))*(t_new(2)-t_prev(2)));
+
             //        //store estimated pose
             Pmats[index_now] = cv::Matx34d	(R_new(0,0),R_new(0,1),R_new(0,2),t_new(0),
                                              R_new(1,0),R_new(1,1),R_new(1,2),t_new(1),
                                              R_new(2,0),R_new(2,1),R_new(2,2),t_new(2));
             cout << "Pmats[index_now]:" << endl << Pmats[index_now]  << endl;
 
-            //        Pmats[index_now] = cv::Matx34d	(P_0(0,0),P_0(0,1),P_0(0,2),P_1(0,3),
-            //                                         P_0(1,0),P_0(1,1),P_0(1,2),P_1(1,3),
-            //                                         P_0(2,0),P_0(2,1),P_0(2,2),P_1(2,3));
-
         }
         else
         {
             break;
         }
+    }
 
+    cout << endl;
+    cout << endl;
+    cout << endl;
 
+    //visualization
+
+    imgpts.clear();
+    imgpts.resize(filelist.size());
+    for( index_now = 1; index_now<filelist.size(); index_now++)
+    {
+        index_prev = index_now - 1;
+        descriptors1.release();
+        descriptors2.release();
+
+        ymlFile = ymlFileDir;
+        ymlFile.append(filelist.at(index_prev).fileName()).append(".yml");
+        cout << ymlFile.toStdString()<< endl;
+        restore_descriptors_from_file(ymlFile.toStdString(),imgpts[index_prev],descriptors1);
+
+        ymlFile = ymlFileDir;
+        ymlFile.append(filelist.at(index_now).fileName()).append(".yml");
+        cout << ymlFile.toStdString()<< endl;
+        restore_descriptors_from_file(ymlFile.toStdString(),imgpts[index_now],descriptors2);
+
+        matches.clear();
+        //matching
+        matching_fb_matcher(descriptors1,descriptors2,matches);
+        matching_good_matching_filter(matches);
+
+        imgpts1_tmp.clear();
+        imgpts2_tmp.clear();
+
+        GetAlignedPointsFromMatch(imgpts[index_prev], imgpts[index_now], matches, imgpts1_tmp, imgpts2_tmp);
+
+        cout << imgpts1_tmp.size() << endl;
+        cout << imgpts1_tmp.size() << endl;
+
+        outCloud.clear();
+        std::vector<cv::KeyPoint> correspImg1Pt;
+        double mean_proj_err = TriangulatePoints(imgpts1_tmp, imgpts2_tmp, K, Kinv,distcoeff, Pmats[index_prev], Pmats[index_now], outCloud, correspImg1Pt);
+
+        std::vector<CloudPoint> outCloud_tmp;
+        outCloud_tmp.clear();
+        for (unsigned int i=0; i<outCloud.size(); i++)
+        {
+            if(outCloud[i].reprojection_error <= 3){
+                //cout << "surving" << endl;
+                outCloud[i].imgpt_for_img.resize(filelist.size());
+                for(int j = 0; j<filelist.size();j++)
+                {
+                    outCloud[i].imgpt_for_img[j] = -1;
+                }
+                outCloud[i].imgpt_for_img[index_now] = matches[i].trainIdx;
+                outCloud_tmp.push_back(outCloud[i]);
+            }
+        }
+        outCloud.clear();
+        outCloud= outCloud_tmp;
+
+        cout << outCloud_tmp.size() << endl;
+
+        for(unsigned int i=0;i<outCloud.size();i++)
+        {
+            outCloud_all.push_back(outCloud[i]);
+        }
+
+        outCloud_new = outCloud;
 
     }
+    for( int i = 0; i<filelist.size(); i++)
+        Pmats[i](1,3) =0;
+
+    GetRGBForPointCloud(outCloud_all,pointCloudRGB);
+
+    ui->widget->update(getPointCloud(),
+                       getPointCloudRGB(),
+                       getCameras());
+
     cout << "finished" <<endl <<endl;
-
-
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -607,9 +679,67 @@ void MainWindow::on_pushButton_clicked()
         std::cout << -1*Pmats[i](0,3) << endl;
     cout << endl;
 
-    //    for( int i = 0; i<filelist.size(); i++)
-    //        std::cout << Pmats[i](1,3) << endl;
+    for( int i = 0; i<filelist.size(); i++)
+        std::cout << -1*Pmats[i](1,3) << endl;
+    cout << endl;
 
+    for( int i = 0; i<filelist.size(); i++)
+        std::cout << "Pmat[" << i << "]:" << endl << Pmats[i] << endl;
+
+    cout << endl << endl << endl;
+    for( int i = 0; i<filelist.size(); i++)
+        std::cout  << everystep[i] << endl;
+    cout << endl << endl << endl;
+    for( int i = 0; i<filelist.size(); i++)
+        std::cout  << pathstep[i] << endl;
 }
 
 
+
+void MainWindow::on_pb_savecloud_clicked()
+{
+    std::vector<cv::Point3d> save_point = getPointCloud();
+    std::vector<cv::Vec3b> save_rgb = getPointCloudRGB();
+    std::vector<cv::Matx34d> save_camera = getCameras();
+    cv::Matx34d tmp;
+    cv::FileStorage fs("/home/sy/set/data/savingcoud.yml", cv::FileStorage::WRITE);
+    for(int i = 0; i < filelist.size(); i++)
+    {
+        write( fs , "frame" + QString::number(i).toStdString(), Mat(save_camera.at(i)));
+    }
+    cout  << "saving camera finished " << endl;
+    cv::write(fs,"points",save_point);
+    cout  << "saving cloud finished " << endl;
+    cv::write(fs,"rgb",save_rgb);
+    cout  << "saving rgb finished " << endl;
+
+
+    fs.release();
+
+}
+
+void MainWindow::on_pb_loadcloud_clicked()
+{
+    cv::FileStorage store("/home/sy/set/data/savingcoud.yml", FileStorage::READ);
+    for(int i = 0; i < filelist.size(); i++)
+    {
+        Mat tmp_mat;
+        store["frame" + QString::number(i).toStdString()] >> tmp_mat;
+        double* data = reinterpret_cast<double*>(tmp_mat.data);
+        cv::Matx34d rotation_vector(data);//make Matx33d
+        save_camera.push_back(rotation_vector);
+    }
+    cout  << save_camera.size() << endl;
+    cv::FileNode n1 = store["points"];
+    cv::FileNode n2 = store["rgb"];
+    cv::read(n1,save_point);
+    cv::read(n2,save_rgb);
+    cout  << save_point.size() << endl;
+    cout  << save_rgb.size() << endl;
+    store.release();
+    ui->widget->update(save_point,
+                       save_rgb,
+                       save_camera);
+
+
+}

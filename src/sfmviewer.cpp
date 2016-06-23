@@ -22,6 +22,7 @@ void SFMViewer::update(std::vector<cv::Point3d> pcld,
             cldm.row(i)(1) = pcld[i].y;
             cldm.row(i)(2) = pcld[i].z;
         }
+
         cv::Mat_<double> mean; //cv::reduce(cldm,mean,0,CV_REDUCE_AVG);
         cv::PCA pca(cldm, mean, CV_PCA_DATA_AS_ROW);
 
@@ -86,11 +87,11 @@ void SFMViewer::draw() {
         glMultMatrixd(m_cameras_transforms[i].data());
 
         glColor4f(1, 0, 0, 1);
-        QGLViewer::drawArrow(qglviewer::Vec(0, 0, 0), qglviewer::Vec(1, 0, 0),0.2);
+        QGLViewer::drawArrow(qglviewer::Vec(0, 0, 0), qglviewer::Vec(200, 0, 0),12);
         glColor4f(0, 1, 0, 1);
-        QGLViewer::drawArrow(qglviewer::Vec(0, 0, 0), qglviewer::Vec(0, 1, 0),0.2);
+        QGLViewer::drawArrow(qglviewer::Vec(0, 0, 0), qglviewer::Vec(0, 200, 0),12);
         glColor4f(0, 0, 1, 1);
-        QGLViewer::drawArrow(qglviewer::Vec(0, 0, 0), qglviewer::Vec(0, 0, 1),0.2);
+        QGLViewer::drawArrow(qglviewer::Vec(0, 0, 0), qglviewer::Vec(0, 0, 200),12);
 
         glPopMatrix();
     }
@@ -104,6 +105,8 @@ void SFMViewer::init() {
     restoreStateFromFile();
 
     setFPSIsDisplayed();
+
+    setGridIsDrawn(false);
 
     setSceneBoundingBox(qglviewer::Vec(-50, -50, -50), qglviewer::Vec(50, 50, 50));
 

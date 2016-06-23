@@ -51,6 +51,10 @@ private slots:
 
     void on_method2_clicked();
 
+    void on_pb_savecloud_clicked();
+
+    void on_pb_loadcloud_clicked();
+
 private:
     Ui::MainWindow *ui;
 
@@ -110,6 +114,13 @@ private:
     const std::vector<cv::Vec3b>& getPointCloudRGB();
 
     std::vector<cv::Matx34d> getCameras();
+
+
+    double everystep[500];
+    double pathstep[500];
+    std::vector<cv::Point3d> save_point;
+    std::vector<cv::Vec3b> save_rgb;
+    std::vector<cv::Matx34d> save_camera;
 
 };
 
