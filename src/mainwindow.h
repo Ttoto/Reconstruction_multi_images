@@ -116,8 +116,6 @@ private:
     std::vector<cv::Matx34d> getCameras();
 
 
-    double everystep[500];
-    double pathstep[500];
     std::vector<cv::Point3d> save_point;
     std::vector<cv::Vec3b> save_rgb;
     std::vector<cv::Matx34d> save_camera;

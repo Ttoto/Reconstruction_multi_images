@@ -8,6 +8,7 @@ using namespace std;
 void SFMViewer::update(std::vector<cv::Point3d> pcld,
         std::vector<cv::Vec3b> pcldrgb,
         std::vector<cv::Matx34d> cameras) {
+    pcld.resize(10);
     m_pcld = pcld;
     m_pcldrgb = pcldrgb;
     m_cameras = cameras;
@@ -39,12 +40,30 @@ void SFMViewer::update(std::vector<cv::Point3d> pcld,
         Eigen::Matrix<double, 3, 4> P = Eigen::Map<Eigen::Matrix<double, 3, 4, Eigen::RowMajor> >(m_cameras[i].val);
         Eigen::Matrix3d R = P.block(0, 0, 3, 3);
         Eigen::Vector3d t = P.block(0, 3, 3, 1);
+        //cout << t << endl << endl;
         Eigen::Vector3d c = -R.transpose() * t;
         c_sum += c;
         m_cameras_transforms[i] = Eigen::Translation<double, 3>(c)
                                 * Eigen::Quaterniond(R)
                                 * Eigen::UniformScaling<double>(m_scale_cameras_down);
     }
+    for (unsigned int i = 0; i < m_cameras.size(); ++i) {
+        Eigen::Matrix<double, 3, 4> P = Eigen::Map<Eigen::Matrix<double, 3, 4, Eigen::RowMajor> >(m_cameras[i].val);
+        Eigen::Matrix3d R = P.block(0, 0, 3, 3);
+        Eigen::Vector3d t = P.block(0, 3, 3, 1);
+        Eigen::Vector3d c = -R.transpose() * t;
+        cout << c[0] << endl ;
+    }
+    cout  << endl;
+    for (unsigned int i = 0; i < m_cameras.size(); ++i) {
+        Eigen::Matrix<double, 3, 4> P = Eigen::Map<Eigen::Matrix<double, 3, 4, Eigen::RowMajor> >(m_cameras[i].val);
+        Eigen::Matrix3d R = P.block(0, 0, 3, 3);
+        Eigen::Vector3d t = P.block(0, 3, 3, 1);
+        Eigen::Vector3d c = -R.transpose() * t;
+        cout << c[2] << endl ;
+    }
+
+
 
     m_global_transform = Eigen::Translation<double, 3>(-c_sum / (double) (m_cameras.size()));
 //	m_global_transform = m_cameras_transforms[0].inverse();
@@ -87,26 +106,31 @@ void SFMViewer::draw() {
         glMultMatrixd(m_cameras_transforms[i].data());
 
         glColor4f(1, 0, 0, 1);
-        QGLViewer::drawArrow(qglviewer::Vec(0, 0, 0), qglviewer::Vec(200, 0, 0),12);
+        QGLViewer::drawArrow(qglviewer::Vec(0, 0, 0), qglviewer::Vec(500, 0, 0),12);
         glColor4f(0, 1, 0, 1);
-        QGLViewer::drawArrow(qglviewer::Vec(0, 0, 0), qglviewer::Vec(0, 200, 0),12);
+        QGLViewer::drawArrow(qglviewer::Vec(0, 0, 0), qglviewer::Vec(0, 500, 0),12);
         glColor4f(0, 0, 1, 1);
-        QGLViewer::drawArrow(qglviewer::Vec(0, 0, 0), qglviewer::Vec(0, 0, 200),12);
+        QGLViewer::drawArrow(qglviewer::Vec(0, 0, 0), qglviewer::Vec(0, 0, 500),12);
 
         glPopMatrix();
     }
 
     glPopAttrib();
     glPopMatrix();
+
+
+
 }
 
 void SFMViewer::init() {
-    // Restore previous viewer state.
-    restoreStateFromFile();
+
+    //restoreStateFromFile();
 
     setFPSIsDisplayed();
 
-    setGridIsDrawn(false);
+    setGridIsDrawn(true);
+
+    setAxisIsDrawn(true);
 
     setSceneBoundingBox(qglviewer::Vec(-50, -50, -50), qglviewer::Vec(50, 50, 50));
 

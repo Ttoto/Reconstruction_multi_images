@@ -502,19 +502,10 @@ void MainWindow::on_method2_clicked()
             t_now(1) = P_1(1,3);
             t_now(2) = P_1(2,3);
 
-            everystep[index_now]= sqrt(t_now(0)*t_now(0)
-                                       +t_now(1)*t_now(1)
-                                       +t_now(2)*t_now(2));
-
-
             invert(R_prev, R_prev_inv);
 
             t_new = t_prev + R_prev * t_now ;
             R_new = R_now * R_prev;
-
-            pathstep[index_now] = sqrt((t_new(0)-t_prev(0))*(t_new(0)-t_prev(0))
-                                       +(t_new(1)-t_prev(1))*(t_new(1)-t_prev(1))
-                                       +(t_new(2)-t_prev(2))*(t_new(2)-t_prev(2)));
 
             //        //store estimated pose
             Pmats[index_now] = cv::Matx34d	(R_new(0,0),R_new(0,1),R_new(0,2),t_new(0),
@@ -671,27 +662,10 @@ void MainWindow::GetRGBForPointCloud(
 
 void MainWindow::on_pushButton_clicked()
 {
-    //List the transmition of the camera.
-    for( int i = 0; i<filelist.size(); i++)
-        std::cout << -1*Pmats[i](2,3) << endl;
-    cout << endl;
-    for( int i = 0; i<filelist.size(); i++)
-        std::cout << -1*Pmats[i](0,3) << endl;
-    cout << endl;
-
-    for( int i = 0; i<filelist.size(); i++)
-        std::cout << -1*Pmats[i](1,3) << endl;
-    cout << endl;
 
     for( int i = 0; i<filelist.size(); i++)
         std::cout << "Pmat[" << i << "]:" << endl << Pmats[i] << endl;
 
-    cout << endl << endl << endl;
-    for( int i = 0; i<filelist.size(); i++)
-        std::cout  << everystep[i] << endl;
-    cout << endl << endl << endl;
-    for( int i = 0; i<filelist.size(); i++)
-        std::cout  << pathstep[i] << endl;
 }
 
 
